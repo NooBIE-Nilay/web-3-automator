@@ -6,6 +6,7 @@ export const workflowRouter = express.Router();
 
 // In-memory storage (replace with a database in production)
 const workflows = new Map();
+const workflowExecutors = new Map();
 
 // Create a new workflow
 workflowRouter.post("/", (req, res) => {
@@ -59,5 +60,26 @@ workflowRouter.post("/:id/execute", (req, res) => {
     console.error("Workflow execution failed:", error);
   });
 
+  workflowExecutors.set(workflow.id, executor);
+
   res.json({ message: "Workflow execution started", workflowId: workflow.id });
+});
+
+// Stop a workflow
+
+workflowRouter.post("/:id/stop", (req, res) => {
+  const workflow = workflows.get(req.params.id);
+  if (!workflow) {
+    return res.status(404).json({ error: "Workflow not found" });
+  }
+
+  const executor = workflowExecutors.get(workflow.id);
+  if (!executor) {
+    return res.status(404).json({ error: "Workflow not running" });
+  }
+
+  executor.stop();
+
+  res.json({ message: "Workflow stopping started", workflowId: workflow.id });
+
 });
