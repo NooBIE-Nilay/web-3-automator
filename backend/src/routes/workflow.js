@@ -13,7 +13,17 @@ workflowRouter.post("/", (req, res) => {
   const { name, nodes, edges } = req.body;
   const workflow = new Workflow(name, nodes, edges);
   workflows.set(workflow.id, workflow);
-  res.status(201).json(workflow);
+
+  const executor = new WorkflowExecutor(workflow);
+
+  // Start execution asynchronously
+  executor.execute().catch((error) => {
+    console.error("Workflow execution failed:", error);
+  });
+
+  workflowExecutors.set(workflow.id, executor);
+
+  res.json({ message: "Workflow execution started", workflowId: workflow.id });
 });
 
 // Get all workflows

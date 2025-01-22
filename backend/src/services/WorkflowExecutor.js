@@ -4,6 +4,8 @@ import { executeMoralisErc20WalletTransfersNode } from "./nodes/app/moralis.js";
 import { executeSelectDataNode } from "./nodes/transformation/selectData.js";
 import { executeTelegramNotification } from "./nodes/app/telegram.js";
 import { returnCoinbaseWallet, tradeCoinbase } from "./nodes/web3/coinbase.js";
+import { executeDeployAndMintNFT } from "./nodes/web3/deployAndMintNFT.js";
+import { executeFetchGoogleSheetColumn } from "./nodes/app/googlesheet.js";
 
 export class WorkflowExecutor extends EventEmitter {
   constructor(workflow) {
@@ -12,11 +14,11 @@ export class WorkflowExecutor extends EventEmitter {
     this.nodeResults = new Map();
     this.nodeOutputs = {};
     this.eventEmitter = eventEmitterStore.getEmitter();
-    this.cronjobFlag = false;
+    this.intervalFlag = false;
   }
 
   async stop() {
-    this.cronjobFlag = false;
+    this.intervalFlag = false;
   }
 
   async execute() {
@@ -25,12 +27,12 @@ export class WorkflowExecutor extends EventEmitter {
       this.emit("workflowStart", { workflowId: this.workflow.id });
 
       const startNode = this.workflow.nodes.find((node) => node.id === "start");
-      if (startNode.type == "cronjob") {
-        this.cronjobFlag = true;
-        while (this.cronjobFlag) {
-          console.log("cronjob running");
+      if (startNode.data.config.trigger == "interval") {
+        this.intervalFlag = true;
+        while (this.intervalFlag) {
+          console.log("running in interval");
           await this.executeNodes(startNode.id, null);
-          await new Promise((resolve) => setTimeout(resolve, startNode.data.config.interval));
+          await new Promise((resolve) => setTimeout(resolve, startNode.data.config.value));
         }
       } else {
         await this.executeNodes(startNode.id, null);
@@ -71,6 +73,8 @@ export class WorkflowExecutor extends EventEmitter {
       this.emit("nodeStart", { nodeId: node.id });
 
       console.log("executing node ", node.id);
+      // delay 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Execute the node based on its type
       const [output, nextNodeId] = await this.executeNodeLogic(node, input);
@@ -101,7 +105,7 @@ export class WorkflowExecutor extends EventEmitter {
     // This is where you'd implement different node types
     // console.log("curr node ", node);
     switch (node.type) {
-      case "cronjob": {
+      case "start": {
         console.log(this.workflow.edges);
         console.log(this.workflow.edges.find((edge) => edge.source === node.id));
         const nextNodeId = this.workflow.edges.find((edge) => edge.source === node.id).target;
@@ -110,13 +114,13 @@ export class WorkflowExecutor extends EventEmitter {
       case "coinbaseWallet": {
         return await returnCoinbaseWallet(this.workflow, node, inputs);
       }
-      case "moralis-erc20-wallet-transfers": {
+      case "moralis": {
         return await executeMoralisErc20WalletTransfersNode(this.workflow, node, inputs);
       }
       case "selectData": {
         return await executeSelectDataNode(this.workflow, node, inputs);
       }
-      case "loopOverItems": {
+      case "loop": {
         const results = [];
         for (const input of inputs) {
           const [loopResult, _] = await this.executeNodes(node.data.loopId, input);
@@ -126,11 +130,17 @@ export class WorkflowExecutor extends EventEmitter {
         const nextNodeId = node.data.doneId;
         return [output, nextNodeId];
       }
-      case "tradeCoinbase": {
+      case "coinbase": {
         return await tradeCoinbase(this.workflow, node, inputs);
       }
-      case "notification": {
+      case "telegram": {
         return await executeTelegramNotification(this.workflow, node, inputs);
+      }
+      case "googleSheets": {
+        return await executeFetchGoogleSheetColumn(this.workflow, node, inputs);
+      }
+      case "deployNFT": {
+        return await executeDeployAndMintNFT(this.workflow, node, inputs);
       }
       default:
         return this.executeActionNode(node, inputs, "unknown type");

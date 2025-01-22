@@ -4,7 +4,7 @@ async function executeSelectDataNode(workflow, node, inputs) {
     if (Array.isArray(inputs)) {
       const selector = node.data.config.field;
       const data = inputs.map((input) => input[selector]);
-      return [data, nextNodeId];
+      return [data.slice(0,5), nextNodeId];
     } else if (typeof inputs === "object") {
       const selector = node.data.config.field;
       const data = inputs[selector];
