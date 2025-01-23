@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -9,27 +9,32 @@ import ReactFlow, {
   useEdgesState,
   ReactFlowInstance,
   Node,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import { useWorkflowStore } from '../../stores/workflowStore';
-import { useModalStore } from '../../stores/modalStore';
-import { nodeTypes } from './nodes';
-import NodeSidebar from './NodeSidebar';
-import StartNodeModal from './StartNodeModal';
-import ExecuteFlowButton from './ExecuteFlowButton';
-import CustomEdge from './edges/CustomEdge';
+} from "reactflow";
+import "reactflow/dist/style.css";
+import { useWorkflowStore } from "../../stores/workflowStore";
+import { useModalStore } from "../../stores/modalStore";
+import { nodeTypes } from "./nodes";
+import NodeSidebar from "./NodeSidebar";
+import StartNodeModal from "./StartNodeModal";
+import ExecuteFlowButton from "./ExecuteFlowButton";
+import CustomEdge from "./edges/CustomEdge";
 
 // Import all modals
-import FilterModal from './nodes/Filter/FilterModal';
-import CodeModal from './nodes/Code/CodeModal';
-import ConditionalModal from './nodes/Conditional/ConditionalModal';
-import DelayModal from './nodes/Delay/DelayModal';
-import WebhookModal from './nodes/Webhook/WebhookModal';
-import HttpRequestModal from './nodes/HttpRequest/HttpRequestModal';
-import EmailModal from './nodes/Email/EmailModal';
-import PrivateKeyModal from './nodes/PrivateKey/PrivateKeyModal';
-import TaskModal from './nodes/Task/TaskModal';
-import LoopModal from './nodes/Loop/LoopModal';
+import FilterModal from "./nodes/Filter/FilterModal";
+import CodeModal from "./nodes/Code/CodeModal";
+import ConditionalModal from "./nodes/Conditional/ConditionalModal";
+import DelayModal from "./nodes/Delay/DelayModal";
+import WebhookModal from "./nodes/Webhook/WebhookModal";
+import HttpRequestModal from "./nodes/HttpRequest/HttpRequestModal";
+import EmailModal from "./nodes/Email/EmailModal";
+import PrivateKeyModal from "./nodes/PrivateKey/PrivateKeyModal";
+import TaskModal from "./nodes/Task/TaskModal";
+import LoopModal from "./nodes/Loop/LoopModal";
+import EventListenerModal from "./nodes/EventListener/EventListenerModal";
+import SelectDataModal from "./nodes/SelectData/SelectDataModal";
+import TelegramModal from "./nodes/Telegram/TelegramModal";
+import CoinbaseModal from "./nodes/Coinbase/CoinbaseModal";
+import MoralisModal from "./nodes/Moralis/MoralisModal";
 
 const edgeTypes = {
   smoothstep: CustomEdge,
@@ -37,17 +42,22 @@ const edgeTypes = {
 
 // Map node types to their corresponding modal types
 const nodeToModalType = {
-  start: 'start',
-  filter: 'filter',
-  code: 'code',
-  conditional: 'conditional',
-  delay: 'delay',
-  webhook: 'webhook',
-  http: 'http',
-  email: 'email',
-  privatekey: 'privatekey',
-  task: 'task',
-  loop: 'loop',
+  start: "start",
+  filter: "filter",
+  code: "code",
+  conditional: "conditional",
+  delay: "delay",
+  webhook: "webhook",
+  http: "http",
+  email: "email",
+  privatekey: "privatekey",
+  eventListener: "eventListener",
+  task: "task",
+  loop: "loop",
+  selectData: "selectData",
+  telegram: "telegram",
+  coinbase: "coinbase",
+  moralis: "moralis",
 } as const;
 
 export default function WorkflowCanvas() {
@@ -57,13 +67,14 @@ export default function WorkflowCanvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState(store.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(store.edges);
 
-  console.log(nodes)
+  console.log(nodes);
 
-  const [reactFlowInstance, setReactFlowInstance] = React.useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] =
+    React.useState<ReactFlowInstance | null>(null);
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      const edge = { ...connection, type: 'smoothstep' };
+      const edge = { ...connection, type: "smoothstep" };
       setEdges((eds) => addEdge(edge, eds));
     },
     [setEdges]
@@ -71,7 +82,7 @@ export default function WorkflowCanvas() {
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = "move";
   }, []);
 
   const onDrop = useCallback(
@@ -82,7 +93,7 @@ export default function WorkflowCanvas() {
         return;
       }
 
-      const type = event.dataTransfer.getData('application/reactflow');
+      const type = event.dataTransfer.getData("application/reactflow");
       if (!type) return;
 
       const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
@@ -95,10 +106,13 @@ export default function WorkflowCanvas() {
         id: `${type}-${Date.now()}`,
         type,
         position,
-        data: { 
-          label: type === 'conditional' ? 'If Condition' : `New ${type}`,
-          description: type === 'conditional' ? 'Define your condition' : `Description for ${type}`,
-          condition: type === 'conditional' ? 'value > 0' : undefined,
+        data: {
+          label: type === "conditional" ? "If Condition" : `New ${type}`,
+          description:
+            type === "conditional"
+              ? "Define your condition"
+              : `Description for ${type}`,
+          condition: type === "conditional" ? "value > 0" : undefined,
         },
       };
 
@@ -108,13 +122,14 @@ export default function WorkflowCanvas() {
   );
 
   const onNodeClick = (_: React.MouseEvent, node: Node) => {
-    if (node.type === 'replace') return;
-    
-    const modalType = nodeToModalType[node.type as keyof typeof nodeToModalType];
+    if (node.type === "replace") return;
+
+    const modalType =
+      nodeToModalType[node.type as keyof typeof nodeToModalType];
     if (modalType) {
       openModal(node, modalType);
     } else {
-      openModal(node, 'edit');
+      openModal(node, "edit");
     }
   };
 
@@ -138,7 +153,7 @@ export default function WorkflowCanvas() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={{
-          type: 'smoothstep',
+          type: "smoothstep",
         }}
         fitView
       >
@@ -157,8 +172,13 @@ export default function WorkflowCanvas() {
       <HttpRequestModal />
       <EmailModal />
       <PrivateKeyModal />
+      <EventListenerModal />
       <TaskModal />
       <LoopModal />
+      <SelectDataModal />
+      <TelegramModal />
+      <CoinbaseModal />
+      <MoralisModal />
     </div>
   );
 }

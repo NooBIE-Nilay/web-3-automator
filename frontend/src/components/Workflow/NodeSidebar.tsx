@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   AppWindow,
   GitBranch,
@@ -19,145 +19,13 @@ import {
   Globe,
   RefreshCw,
   X,
-} from 'lucide-react';
-import { useWorkflowStore } from '../../stores/workflowStore';
-import { useSidebarStore } from '../../stores/sidebarStore';
+  MessageCircleHeart,
+} from "lucide-react";
+import { useWorkflowStore } from "../../stores/workflowStore";
+import { useSidebarStore } from "../../stores/sidebarStore";
+import { nodeCategory } from "./NodeCategory";
 
-const nodeCategories = [
-  {
-    name: 'Flow',
-    nodes: [
-      {
-        type: 'conditional',
-        label: 'If Condition',
-        icon: GitBranch,
-        description: 'Branch workflow based on condition',
-      },
-      {
-        type: 'loop',
-        label: 'Loop',
-        icon: RefreshCw,
-        description: 'Loop over items',
-      },
-      {
-        type: 'switch',
-        label: 'Switch',
-        icon: GitBranch,
-        description: 'Multiple conditional branches',
-      },
-      {
-        type: 'delay',
-        label: 'Time Delay',
-        icon: TimerReset,
-        description: 'Add delay between steps',
-      },
-    ],
-  },
-  {
-    name: 'App',
-    nodes: [
-      {
-        type: 'uniswap',
-        label: 'Uniswap',
-        icon: ArrowRightLeft,
-        description: 'Interact with Uniswap protocol',
-      },
-      {
-        type: 'textscreener',
-        label: 'Text Screener',
-        icon: FileText,
-        description: 'Screen and analyze text content',
-      },
-      {
-        type: 'googlesheets',
-        label: 'Google Sheets',
-        icon: Table,
-        description: 'Interact with Google Sheets',
-      },
-    ],
-  },
-  {
-    name: 'Transformation',
-    nodes: [
-      {
-        type: 'filter',
-        label: 'Filter',
-        icon: Filter,
-        description: 'Filter data based on conditions',
-      },
-      {
-        type: 'code',
-        label: 'Code',
-        icon: Code,
-        description: 'Execute custom code',
-      },
-      {
-        type: 'summarize',
-        label: 'Summarize',
-        icon: FileText,
-        description: 'Summarize data or text',
-      },
-    ],
-  },
-  {
-    name: 'Web3',
-    nodes: [
-      {
-        type: 'privatekey',
-        label: 'Private Key',
-        icon: Wallet,
-        description: 'Manage private keys',
-      },
-      {
-        type: 'contract-events',
-        label: 'Contract Events',
-        icon: Blocks,
-        description: 'Listen to contract events',
-      },
-      {
-        type: 'contract-transactions',
-        label: 'Contract Transactions',
-        icon: Blocks,
-        description: 'Monitor contract transactions',
-      },
-      {
-        type: 'contract-function',
-        label: 'Contract Function',
-        icon: FileCode,
-        description: 'Execute contract functions',
-      },
-    ],
-  },
-  {
-    name: 'Core',
-    nodes: [
-      {
-        type: 'webhook',
-        label: 'Webhook',
-        icon: Webhook,
-        description: 'Handle HTTP webhooks',
-      },
-      {
-        type: 'http',
-        label: 'HTTP Request',
-        icon: Globe,
-        description: 'Make HTTP requests',
-      },
-      {
-        type: 'code',
-        label: 'Code',
-        icon: Code,
-        description: 'Execute custom code',
-      },
-      {
-        type: 'email',
-        label: 'Email',
-        icon: Mail,
-        description: 'Send email notifications',
-      },
-    ],
-  },
-];
+const nodeCategories = nodeCategory;
 
 export default function NodeSidebar() {
   const { isOpen, selectedNodeId, closeSidebar } = useSidebarStore();
@@ -169,16 +37,16 @@ export default function NodeSidebar() {
   const handleNodeSelect = (type: string) => {
     if (selectedNodeId) {
       const newNode = {
-        id: `${type}-${Date.now()}`,
+        id: `${selectedNodeId}`,
         type,
         position: { x: 0, y: 0 },
         data: {
-          label: type === 'conditional' ? 'If Condition' : `New ${type}`,
+          label: type === "conditional" ? "If Condition" : `New ${type}`,
           description:
-            type === 'conditional'
-              ? 'Define your condition'
+            type === "conditional"
+              ? "Define your condition"
               : `Description for ${type}`,
-          condition: type === 'conditional' ? 'value > 0' : undefined,
+          condition: type === "conditional" ? "value > 0" : undefined,
         },
       };
       addNodeWithButton(newNode, selectedNodeId);
@@ -189,7 +57,7 @@ export default function NodeSidebar() {
   return (
     <div
       className={`fixed inset-y-0 right-0 w-80 bg-white shadow-lg border-l border-gray-200 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
+        isOpen ? "translate-x-0" : "translate-x-full"
       } z-50`}
     >
       <div className="h-full flex flex-col">

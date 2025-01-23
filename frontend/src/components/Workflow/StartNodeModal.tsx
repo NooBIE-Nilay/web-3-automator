@@ -1,11 +1,12 @@
 import React from 'react';
-import { X, Clock, Webhook, Blocks } from 'lucide-react';
+import { X, Clock, Webhook, Blocks, Timer } from 'lucide-react';
 import { TriggerType, TriggerConfig } from '../../types/workflow';
 import { useModalStore } from '../../stores/modalStore';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import CronjobConfig from './triggers/CronjobConfig';
 import WebhookConfig from './triggers/WebhookConfig';
 import OnChainConfig from './triggers/OnChainConfig';
+import IntervalConfig from './triggers/IntervalConfig';
 
 const triggerTypes: { type: TriggerType; label: string; icon: React.ElementType; description: string }[] = [
   {
@@ -25,13 +26,20 @@ const triggerTypes: { type: TriggerType; label: string; icon: React.ElementType;
     label: 'On-Chain Event',
     icon: Blocks,
     description: 'Listen for blockchain events'
+  },
+  {
+    type: 'interval',
+    label: 'Interval',
+    icon: Timer,
+    description: 'Run workflow at fixed time intervals'
   }
 ];
 
 const defaultParams = {
   cronjob: { schedule: '*/5 * * * *', timezone: 'UTC' },
   webhook: { method: 'POST' as const, path: '/webhook' },
-  onchain: { network: 'ethereum', contract: '', event: '' }
+  onchain: { network: 'ethereum', contract: '', event: '' },
+  interval: { interval: '10s' as const }
 };
 
 export default function StartNodeModal() {
@@ -41,9 +49,12 @@ export default function StartNodeModal() {
   const [config, setConfig] = React.useState<TriggerConfig | null>(null);
 
   React.useEffect(() => {
-    if (selectedNode?.data?.trigger) {
-      setSelectedTrigger(selectedNode.data.trigger.type);
-      setConfig(selectedNode.data.trigger);
+    if (selectedNode?.data?.config?.trigger) {
+      setSelectedTrigger(selectedNode.data.config.trigger);
+      setConfig({
+        type: selectedNode.data.config.trigger,
+        params: selectedNode.data.config
+      });
     }
   }, [selectedNode]);
 
@@ -57,11 +68,27 @@ export default function StartNodeModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (config) {
-      updateNode(selectedNode.id, {
-        ...selectedNode.data,
-        label: `${triggerTypes.find(t => t.type === config.type)?.label} Trigger`,
-        trigger: config
-      });
+      let nodeData;
+      if (config.type === 'interval') {
+        nodeData = {
+          label: 'Start',
+          config: {
+            trigger: 'interval',
+            value: config.params.interval === '10s' ? '10000' :
+                   config.params.interval === '30s' ? '30000' : '60000'
+          }
+        };
+      } else {
+        nodeData = {
+          label: `${triggerTypes.find(t => t.type === config.type)?.label} Trigger`,
+          config: {
+            trigger: config.type,
+            ...config.params
+          }
+        };
+      }
+      
+      updateNode(selectedNode.id, nodeData);
       closeModal();
     }
   };
@@ -91,6 +118,13 @@ export default function StartNodeModal() {
             onChange={(params) => setConfig({ ...config, params })}
           />
         );
+      case 'interval':
+        return (
+          <IntervalConfig
+            params={config.params}
+            onChange={(params) => setConfig({ ...config, params })}
+          />
+        );
       default:
         return null;
     }
@@ -110,7 +144,7 @@ export default function StartNodeModal() {
         </div>
         <div className="p-4">
           {!selectedTrigger ? (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {triggerTypes.map((trigger) => (
                 <button
                   key={trigger.type}

@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { Clock, Webhook, Blocks } from 'lucide-react';
+import { Clock, Webhook, Blocks, Timer } from 'lucide-react';
 import { handleStyles, nodeStyles } from '../../styles/nodeStyles';
 import { TriggerType } from '../../../../types/workflow';
 
@@ -8,6 +8,7 @@ const iconMap: Record<TriggerType, React.ElementType> = {
   cronjob: Clock,
   webhook: Webhook,
   onchain: Blocks,
+  interval: Timer
 };
 
 function StartNode({ data }: NodeProps) {
