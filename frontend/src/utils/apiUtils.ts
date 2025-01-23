@@ -6,7 +6,7 @@ interface WorkflowPayload {
 }
 
 export async function executeWorkflow(payload: WorkflowPayload): Promise<void> {
-  const response = await fetch('/api/workflow/execute', {
+  const response = await fetch('http://localhost:3000/api/workflows/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

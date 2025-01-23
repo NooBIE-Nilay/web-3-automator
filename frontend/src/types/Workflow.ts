@@ -1,8 +1,8 @@
-export type TriggerType = 'cronjob' | 'webhook' | 'onchain';
+export type TriggerType = 'cronjob' | 'webhook' | 'onchain' | 'interval';
 
 export interface TriggerConfig {
   type: TriggerType;
-  params: CronjobParams | WebhookParams | OnChainParams;
+  params: CronjobParams | WebhookParams | OnChainParams | IntervalParams;
 }
 
 export interface CronjobParams {
@@ -20,4 +20,8 @@ export interface OnChainParams {
   network: string;
   contract: string;
   event: string;
+}
+
+export interface IntervalParams {
+  interval: '10s' | '30s' | '60s';
 }

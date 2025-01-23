@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, MoreVertical } from 'lucide-react';
-import { useWorkspaceStore } from '../../stores/workspaceStore';
+import React, { useState } from "react";
+import { Plus, Trash2, MoreVertical } from "lucide-react";
+import { useWorkspaceStore } from "../../stores/workspaceStore";
 
 export default function WorkspaceSidebar() {
   const {
@@ -12,13 +12,13 @@ export default function WorkspaceSidebar() {
   } = useWorkspaceStore();
 
   const [isCreating, setIsCreating] = useState(false);
-  const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
   const handleCreateWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
     if (newWorkspaceName.trim()) {
       createWorkspace(newWorkspaceName.trim());
-      setNewWorkspaceName('');
+      setNewWorkspaceName("");
       setIsCreating(false);
     }
   };
@@ -32,7 +32,15 @@ export default function WorkspaceSidebar() {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-bold mb-4">Workspaces</h2>
+        <h1 className="text-xl font-bold mt-1" style={{ fontSize: 24 }}>
+          Web3<span style={{ color: "#3673F5" }}>Automator</span>
+        </h1>
+        <p
+          className="text-xl mb-5"
+          style={{ fontSize: 12, color: "#757575", fontWeight: 300 }}
+        >
+          Acheive what you imagine
+        </p>
         <button
           onClick={() => setIsCreating(true)}
           className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
@@ -61,8 +69,8 @@ export default function WorkspaceSidebar() {
             key={workspace.id}
             className={`group flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors ${
               workspace.id === activeWorkspaceId
-                ? 'bg-primary-50 text-primary-700'
-                : 'hover:bg-gray-50'
+                ? "bg-primary-50 text-primary-700"
+                : "hover:bg-gray-50"
             }`}
             onClick={() => setActiveWorkspace(workspace.id)}
           >

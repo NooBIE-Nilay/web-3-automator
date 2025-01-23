@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import { useModalStore } from '../../../../stores/modalStore';
-import { useWorkflowStore } from '../../../../stores/workflowStore';
+import React, { useState } from "react";
+import { X } from "lucide-react";
+import { useModalStore } from "../../../../stores/modalStore";
+import { useWorkflowStore } from "../../../../stores/workflowStore";
 
 interface LoopConfig {
-  type: 'collection' | 'count' | 'condition';
+  type: "collection" | "count" | "condition";
   collection?: string;
   count?: number;
   condition?: string;
@@ -15,11 +15,11 @@ export default function LoopModal() {
   const updateNode = useWorkflowStore((state) => state.updateNode);
 
   const [config, setConfig] = useState<LoopConfig>({
-    type: 'collection',
-    collection: '$.items'
+    type: "collection",
+    collection: "$.items",
   });
 
-  if (!isOpen || !selectedNode || modalType !== 'loop') return null;
+  if (!isOpen || !selectedNode || modalType !== "loop") return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +50,12 @@ export default function LoopModal() {
             </label>
             <select
               value={config.type}
-              onChange={(e) => setConfig(prev => ({ ...prev, type: e.target.value as LoopConfig['type'] }))}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  type: e.target.value as LoopConfig["type"],
+                }))
+              }
               className="w-full bg-[#3A3A3A] border-gray-600 rounded-md p-2 text-white"
             >
               <option value="collection">For Each Item in Collection</option>
@@ -59,7 +64,7 @@ export default function LoopModal() {
             </select>
           </div>
 
-          {config.type === 'collection' && (
+          {config.type === "collection" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Collection Path
@@ -67,14 +72,16 @@ export default function LoopModal() {
               <input
                 type="text"
                 value={config.collection}
-                onChange={(e) => setConfig(prev => ({ ...prev, collection: e.target.value }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({ ...prev, collection: e.target.value }))
+                }
                 className="w-full bg-[#3A3A3A] border-gray-600 rounded-md p-2 text-white"
                 placeholder="$.items"
               />
             </div>
           )}
 
-          {config.type === 'count' && (
+          {config.type === "count" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Number of Iterations
@@ -82,14 +89,19 @@ export default function LoopModal() {
               <input
                 type="number"
                 value={config.count}
-                onChange={(e) => setConfig(prev => ({ ...prev, count: parseInt(e.target.value) }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    count: parseInt(e.target.value),
+                  }))
+                }
                 className="w-full bg-[#3A3A3A] border-gray-600 rounded-md p-2 text-white"
                 min="1"
               />
             </div>
           )}
 
-          {config.type === 'condition' && (
+          {config.type === "condition" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Continue While
@@ -97,7 +109,9 @@ export default function LoopModal() {
               <input
                 type="text"
                 value={config.condition}
-                onChange={(e) => setConfig(prev => ({ ...prev, condition: e.target.value }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({ ...prev, condition: e.target.value }))
+                }
                 className="w-full bg-[#3A3A3A] border-gray-600 rounded-md p-2 text-white"
                 placeholder="$.counter < 10"
               />
